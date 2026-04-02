@@ -361,7 +361,8 @@ export function TaskModal({
                     type="button"
                     onClick={handleRevertTask}
                     disabled={isLoading}
-                    className="px-5 py-2.5 text-sm font-medium text-white
+                    title="Revert to To Do"
+                    className="p-2.5 text-white
                       bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl
                       hover:from-blue-600 hover:to-indigo-700
                       shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40
@@ -369,7 +370,9 @@ export function TaskModal({
                       disabled:shadow-none transition-all duration-200
                       hover:-translate-y-0.5 active:translate-y-0"
                   >
-                    {isLoading ? 'Reverting...' : 'Revert'}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                    </svg>
                   </button>
                   <button
                     type="button"
@@ -392,7 +395,8 @@ export function TaskModal({
                   type="button"
                   onClick={handleRevertTask}
                   disabled={isLoading}
-                  className="px-5 py-2.5 text-sm font-medium text-white
+                  title="Revert to To Do"
+                  className="p-2.5 text-white
                     bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl
                     hover:from-blue-600 hover:to-indigo-700
                     shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40
@@ -400,7 +404,9 @@ export function TaskModal({
                     disabled:shadow-none transition-all duration-200
                     hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  {isLoading ? 'Reverting...' : 'Revert to To Do'}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                  </svg>
                 </button>
               )}
               <button
