@@ -1,37 +1,32 @@
 'use client';
 
-import { useDroppable } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
 import { TaskCard } from './TaskCard';
 import type { Column as ColumnType, Task } from '@/types';
 
 interface ColumnProps {
   column: ColumnType;
-  onAddTask: (columnId: string) => void;
-  onEditTask: (task: Task) => void;
+  onAddTask: (columnId: string, columnTitle: string) => void;
+  onEditTask: (task: Task, columnTitle: string) => void;
 }
 
 const columnConfig: Record<string, { gradient: string; icon: string; bg: string; accent: string; glow: string }> = {
   'To Do': {
     gradient: 'from-blue-500 to-indigo-600',
-    icon: '📋',
+    icon: '',
     bg: 'bg-blue-950/20',
     accent: 'text-blue-400',
     glow: 'glow-blue',
   },
   'In Progress': {
     gradient: 'from-amber-500 to-orange-500',
-    icon: '⚡',
+    icon: '',
     bg: 'bg-amber-950/20',
     accent: 'text-amber-400',
     glow: 'glow-amber',
   },
   'Done': {
     gradient: 'from-emerald-500 to-green-600',
-    icon: '✅',
+    icon: '',
     bg: 'bg-emerald-950/20',
     accent: 'text-emerald-400',
     glow: 'glow-emerald',
@@ -40,22 +35,13 @@ const columnConfig: Record<string, { gradient: string; icon: string; bg: string;
 
 const defaultConfig = {
   gradient: 'from-gray-500 to-slate-600',
-  icon: '📁',
+  icon: '',
   bg: 'bg-gray-900/20',
   accent: 'text-gray-400',
   glow: '',
 };
 
 export function Column({ column, onAddTask, onEditTask }: ColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: column.id,
-    data: {
-      type: 'column',
-      column,
-    },
-  });
-
-  const taskIds = column.tasks.map((task) => task.id);
   const config = columnConfig[column.title] || defaultConfig;
 
   return (
@@ -89,50 +75,45 @@ export function Column({ column, onAddTask, onEditTask }: ColumnProps) {
             </span>
           </div>
         </div>
-        <button
-          onClick={() => onAddTask(column.id)}
-          className={`
-            p-2 rounded-xl
-            bg-gradient-to-r ${config.gradient}
-            text-white shadow-md
-            hover:shadow-lg hover:scale-105
-            active:scale-95
-            transition-all duration-200
-          `}
-          aria-label={`Add task to ${column.title}`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5"
+        {column.title !== 'Done' && (
+          <button
+            onClick={() => onAddTask(column.id, column.title)}
+            className={`
+              p-2 rounded-xl
+              bg-gradient-to-r ${config.gradient}
+              text-white shadow-md
+              hover:shadow-lg hover:scale-105
+              active:scale-95
+              transition-all duration-200
+            `}
+            aria-label={`Add task to ${column.title}`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div
-        ref={setNodeRef}
-        className={`
-          flex-1 p-3 space-y-3 overflow-y-auto min-h-[300px] max-h-[calc(100vh-280px)]
-          transition-all duration-200
-          ${isOver ? `${config.bg} ring-2 ring-inset ring-indigo-600` : ''}
-        `}
+        className="flex-1 p-3 space-y-3 overflow-y-auto min-h-[300px] max-h-[calc(100vh-280px)]"
       >
-        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {column.tasks.map((task, index) => (
-            <div key={task.id} className={`stagger-${Math.min(index + 1, 5)}`}>
-              <TaskCard task={task} onEdit={onEditTask} />
-            </div>
-          ))}
-        </SortableContext>
+        {column.tasks.map((task, index) => (
+          <div key={task.id} className={`stagger-${Math.min(index + 1, 5)}`}>
+            <TaskCard task={task} onEdit={(t) => onEditTask(t, column.title)} />
+          </div>
+        ))}
 
         {column.tasks.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-gray-500 empty-state rounded-xl">

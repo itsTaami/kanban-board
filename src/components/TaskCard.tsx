@@ -1,29 +1,26 @@
 'use client';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import type { Task, Priority } from '@/types';
 
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
-  isDragOverlay?: boolean;
 }
 
 const priorityConfig: Record<Priority, { bg: string; icon: string; label: string }> = {
   LOW: {
     bg: 'bg-gradient-to-r from-blue-900/50 to-blue-800/30 text-blue-300 ring-1 ring-blue-800',
-    icon: '○',
+    icon: '',
     label: 'Low',
   },
   MEDIUM: {
     bg: 'bg-gradient-to-r from-amber-900/50 to-amber-800/30 text-amber-300 ring-1 ring-amber-800',
-    icon: '◐',
+    icon: '',
     label: 'Medium',
   },
   HIGH: {
     bg: 'bg-gradient-to-r from-red-900/50 to-red-800/30 text-red-300 ring-1 ring-red-800',
-    icon: '●',
+    icon: '',
     label: 'High',
   },
 };
@@ -34,27 +31,7 @@ const priorityBorder: Record<Priority, string> = {
   HIGH: 'border-l-red-500',
 };
 
-export function TaskCard({ task, onEdit, isDragOverlay }: TaskCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: task.id,
-    data: {
-      type: 'task',
-      task,
-    },
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
+export function TaskCard({ task, onEdit }: TaskCardProps) {
   const isOverdue =
     task.dueDate && new Date(task.dueDate) < new Date() && task.columnId !== 'done';
 
@@ -71,34 +48,19 @@ export function TaskCard({ task, onEdit, isDragOverlay }: TaskCardProps) {
     });
   };
 
-  if (isDragging && !isDragOverlay) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="p-3 rounded-xl border-2 border-dashed border-indigo-600 bg-indigo-900/20 min-h-[80px]"
-      />
-    );
-  }
-
   const priority = task.priority as Priority;
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
       onClick={() => onEdit(task)}
       className={`
         group p-4 rounded-xl bg-slate-800/90
         shadow-sm hover:shadow-lg hover:shadow-indigo-500/10
         border border-slate-700/50 hover:border-indigo-500/30
         border-l-4 ${priorityBorder[priority]}
-        cursor-grab active:cursor-grabbing
+        cursor-pointer
         transition-all duration-200 ease-out
         hover:-translate-y-1
-        ${isDragOverlay ? 'drag-overlay shadow-2xl scale-105' : ''}
         animate-fade-in
         card-shine
       `}

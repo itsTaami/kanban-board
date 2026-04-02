@@ -1,21 +1,9 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  closestCorners,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragStartEvent,
-  type DragEndEvent,
-  type DragOverEvent,
-} from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
 import { Column } from './Column';
-import { TaskCard } from './TaskCard';
 import { TaskModal } from './TaskModal';
+import { HowToUse } from './HowToUse';
 import { createTask, updateTask, deleteTask, moveTask } from '@/lib/actions';
 import type { Column as ColumnType, Task, CreateTaskInput, UpdateTaskInput } from '@/types';
 
@@ -25,147 +13,22 @@ interface BoardProps {
 
 export function Board({ initialColumns }: BoardProps) {
   const [columns, setColumns] = useState<ColumnType[]>(initialColumns);
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedColumnId, setSelectedColumnId] = useState<string>('');
+  const [selectedColumnTitle, setSelectedColumnTitle] = useState<string>('');
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
-
-  const findColumnByTaskId = useCallback(
-    (taskId: string) => {
-      return columns.find((col) => col.tasks.some((task) => task.id === taskId));
-    },
-    [columns]
-  );
-
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const { active } = event;
-    const task = active.data.current?.task as Task;
-    if (task) {
-      setActiveTask(task);
-    }
-  }, []);
-
-  const handleDragOver = useCallback(
-    (event: DragOverEvent) => {
-      const { active, over } = event;
-      if (!over) return;
-
-      const activeId = active.id as string;
-      const overId = over.id as string;
-
-      const activeColumn = findColumnByTaskId(activeId);
-      const overColumn =
-        columns.find((col) => col.id === overId) || findColumnByTaskId(overId);
-
-      if (!activeColumn || !overColumn || activeColumn.id === overColumn.id) {
-        return;
-      }
-
-      setColumns((prev) => {
-        const activeTaskIndex = activeColumn.tasks.findIndex(
-          (t) => t.id === activeId
-        );
-        const activeTaskData = activeColumn.tasks[activeTaskIndex];
-
-        return prev.map((col) => {
-          if (col.id === activeColumn.id) {
-            return {
-              ...col,
-              tasks: col.tasks.filter((t) => t.id !== activeId),
-            };
-          }
-          if (col.id === overColumn.id) {
-            const overTaskIndex = col.tasks.findIndex((t) => t.id === overId);
-            const newTasks = [...col.tasks];
-            const insertIndex =
-              overTaskIndex >= 0 ? overTaskIndex : col.tasks.length;
-            newTasks.splice(insertIndex, 0, {
-              ...activeTaskData,
-              columnId: col.id,
-            });
-            return {
-              ...col,
-              tasks: newTasks,
-            };
-          }
-          return col;
-        });
-      });
-    },
-    [columns, findColumnByTaskId]
-  );
-
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      const { active, over } = event;
-      setActiveTask(null);
-
-      if (!over) return;
-
-      const activeId = active.id as string;
-      const overId = over.id as string;
-
-      const activeColumn = findColumnByTaskId(activeId);
-      const overColumn =
-        columns.find((col) => col.id === overId) || findColumnByTaskId(overId);
-
-      if (!activeColumn || !overColumn) return;
-
-      const activeTaskIndex = activeColumn.tasks.findIndex(
-        (t) => t.id === activeId
-      );
-      const overTaskIndex =
-        overColumn.id === overId
-          ? overColumn.tasks.length
-          : overColumn.tasks.findIndex((t) => t.id === overId);
-
-      if (activeColumn.id === overColumn.id) {
-        // Same column - just reorder
-        if (activeTaskIndex !== overTaskIndex) {
-          setColumns((prev) =>
-            prev.map((col) => {
-              if (col.id === activeColumn.id) {
-                return {
-                  ...col,
-                  tasks: arrayMove(col.tasks, activeTaskIndex, overTaskIndex),
-                };
-              }
-              return col;
-            })
-          );
-
-          // Persist to database
-          const newOrder =
-            overTaskIndex >= 0 ? overTaskIndex : overColumn.tasks.length;
-          await moveTask(activeId, overColumn.id, newOrder);
-        }
-      } else {
-        // Different column - move task
-        const newOrder =
-          overTaskIndex >= 0 ? overTaskIndex : overColumn.tasks.length;
-        await moveTask(activeId, overColumn.id, newOrder);
-      }
-    },
-    [columns, findColumnByTaskId]
-  );
-
-  const handleAddTask = useCallback((columnId: string) => {
+  const handleAddTask = useCallback((columnId: string, columnTitle: string) => {
     setSelectedColumnId(columnId);
+    setSelectedColumnTitle(columnTitle);
     setEditingTask(null);
     setIsModalOpen(true);
   }, []);
 
-  const handleEditTask = useCallback((task: Task) => {
+  const handleEditTask = useCallback((task: Task, columnTitle: string) => {
     setEditingTask(task);
     setSelectedColumnId(task.columnId);
+    setSelectedColumnTitle(columnTitle);
     setIsModalOpen(true);
   }, []);
 
@@ -177,7 +40,6 @@ export function Board({ initialColumns }: BoardProps) {
   const handleSaveTask = useCallback(
     async (data: CreateTaskInput | UpdateTaskInput) => {
       if ('id' in data) {
-        // Update existing task
         const updatedTask = await updateTask(data);
         setColumns((prev) =>
           prev.map((col) => ({
@@ -188,7 +50,6 @@ export function Board({ initialColumns }: BoardProps) {
           }))
         );
       } else {
-        // Create new task
         const newTask = await createTask(data);
         setColumns((prev) =>
           prev.map((col) => {
@@ -216,49 +77,74 @@ export function Board({ initialColumns }: BoardProps) {
     );
   }, []);
 
+  const handleMoveTask = useCallback(async (taskId: string, targetColumnTitle: string) => {
+    let targetColumnId = '';
+    let targetColumnTaskCount = 0;
+
+    setColumns((prev) => {
+      const targetColumn = prev.find(col => col.title === targetColumnTitle);
+      if (!targetColumn) return prev;
+
+      targetColumnId = targetColumn.id;
+      targetColumnTaskCount = targetColumn.tasks.length;
+
+      const sourceColumn = prev.find(col => col.tasks.some(t => t.id === taskId));
+      if (!sourceColumn) return prev;
+
+      const task = sourceColumn.tasks.find(t => t.id === taskId);
+      if (!task) return prev;
+
+      return prev.map((col) => {
+        if (col.id === sourceColumn.id) {
+          return {
+            ...col,
+            tasks: col.tasks.filter((t) => t.id !== taskId),
+          };
+        }
+        if (col.id === targetColumn.id) {
+          return {
+            ...col,
+            tasks: [...col.tasks, { ...task, columnId: col.id }],
+          };
+        }
+        return col;
+      });
+    });
+
+    if (targetColumnId) {
+      await moveTask(taskId, targetColumnId, targetColumnTaskCount);
+    }
+  }, []);
+
   return (
     <>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="flex gap-6 overflow-x-auto pb-6 pt-2 px-2 -mx-2">
-          {columns.map((column, index) => (
-            <div
-              key={column.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <Column
-                column={column}
-                onAddTask={handleAddTask}
-                onEditTask={handleEditTask}
-              />
-            </div>
-          ))}
-        </div>
+      <HowToUse />
 
-        <DragOverlay>
-          {activeTask && (
-            <TaskCard
-              task={activeTask}
-              onEdit={() => {}}
-              isDragOverlay
+      <div className="flex gap-6 overflow-x-auto pb-6 pt-2 px-2 -mx-2">
+        {columns.map((column, index) => (
+          <div
+            key={column.id}
+            className="animate-fade-in"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <Column
+              column={column}
+              onAddTask={handleAddTask}
+              onEditTask={handleEditTask}
             />
-          )}
-        </DragOverlay>
-      </DndContext>
+          </div>
+        ))}
+      </div>
 
       <TaskModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
+        onMoveTask={handleMoveTask}
         task={editingTask}
         columnId={selectedColumnId}
+        columnTitle={selectedColumnTitle}
       />
     </>
   );
