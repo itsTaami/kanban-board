@@ -1,29 +1,41 @@
 import { Board } from '@/components/Board';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { getColumns } from '@/lib/actions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const columns = await getColumns();
+  const totalTasks = columns.reduce((acc, col) => acc + col.tasks.length, 0);
+  const completedTasks = columns.find(col => col.title === 'Done')?.tasks.length || 0;
+  const inProgressTasks = columns.find(col => col.title === 'In Progress')?.tasks.length || 0;
+  const todoTasks = columns.find(col => col.title === 'To Do')?.tasks.length || 0;
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Kanban Board
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Drag and drop tasks to organize your workflow
-            </p>
-          </div>
-          <ThemeToggle />
-        </header>
+    <>
+      <AnimatedBackground />
 
-        <Board initialColumns={columns} />
-      </div>
-    </main>
+      <main className="relative min-h-screen flex flex-col p-4 md:p-8">
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col">
+          <Header
+            totalTasks={totalTasks}
+            completedTasks={completedTasks}
+          />
+
+          <div className="flex-1">
+            <Board initialColumns={columns} />
+          </div>
+
+          <Footer
+            totalTasks={totalTasks}
+            completedTasks={completedTasks}
+            inProgressTasks={inProgressTasks}
+            todoTasks={todoTasks}
+          />
+        </div>
+      </main>
+    </>
   );
 }

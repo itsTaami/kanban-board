@@ -225,14 +225,19 @@ export function Board({ initialColumns }: BoardProps) {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {columns.map((column) => (
-            <Column
+        <div className="flex gap-6 overflow-x-auto pb-6 pt-2 px-2 -mx-2">
+          {columns.map((column, index) => (
+            <div
               key={column.id}
-              column={column}
-              onAddTask={handleAddTask}
-              onEditTask={handleEditTask}
-            />
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <Column
+                column={column}
+                onAddTask={handleAddTask}
+                onEditTask={handleEditTask}
+              />
+            </div>
           ))}
         </div>
 

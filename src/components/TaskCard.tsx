@@ -10,16 +10,28 @@ interface TaskCardProps {
   isDragOverlay?: boolean;
 }
 
-const priorityColors: Record<Priority, string> = {
-  LOW: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  MEDIUM: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  HIGH: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+const priorityConfig: Record<Priority, { bg: string; icon: string; label: string }> = {
+  LOW: {
+    bg: 'bg-gradient-to-r from-blue-900/50 to-blue-800/30 text-blue-300 ring-1 ring-blue-800',
+    icon: '○',
+    label: 'Low',
+  },
+  MEDIUM: {
+    bg: 'bg-gradient-to-r from-amber-900/50 to-amber-800/30 text-amber-300 ring-1 ring-amber-800',
+    icon: '◐',
+    label: 'Medium',
+  },
+  HIGH: {
+    bg: 'bg-gradient-to-r from-red-900/50 to-red-800/30 text-red-300 ring-1 ring-red-800',
+    icon: '●',
+    label: 'High',
+  },
 };
 
-const priorityLabels: Record<Priority, string> = {
-  LOW: 'Low',
-  MEDIUM: 'Medium',
-  HIGH: 'High',
+const priorityBorder: Record<Priority, string> = {
+  LOW: 'border-l-blue-500',
+  MEDIUM: 'border-l-amber-500',
+  HIGH: 'border-l-red-500',
 };
 
 export function TaskCard({ task, onEdit, isDragOverlay }: TaskCardProps) {
@@ -46,6 +58,11 @@ export function TaskCard({ task, onEdit, isDragOverlay }: TaskCardProps) {
   const isOverdue =
     task.dueDate && new Date(task.dueDate) < new Date() && task.columnId !== 'done';
 
+  const isDueSoon =
+    task.dueDate &&
+    !isOverdue &&
+    new Date(task.dueDate) < new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+
   const formatDate = (date: Date | null) => {
     if (!date) return null;
     return new Date(date).toLocaleDateString('en-US', {
@@ -59,10 +76,12 @@ export function TaskCard({ task, onEdit, isDragOverlay }: TaskCardProps) {
       <div
         ref={setNodeRef}
         style={style}
-        className="p-3 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 opacity-50 min-h-[80px]"
+        className="p-3 rounded-xl border-2 border-dashed border-indigo-600 bg-indigo-900/20 min-h-[80px]"
       />
     );
   }
+
+  const priority = task.priority as Priority;
 
   return (
     <div
@@ -72,39 +91,82 @@ export function TaskCard({ task, onEdit, isDragOverlay }: TaskCardProps) {
       {...listeners}
       onClick={() => onEdit(task)}
       className={`
-        p-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700
-        cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow
-        ${isDragOverlay ? 'drag-overlay shadow-xl' : ''}
+        group p-4 rounded-xl bg-slate-800/90
+        shadow-sm hover:shadow-lg hover:shadow-indigo-500/10
+        border border-slate-700/50 hover:border-indigo-500/30
+        border-l-4 ${priorityBorder[priority]}
+        cursor-grab active:cursor-grabbing
+        transition-all duration-200 ease-out
+        hover:-translate-y-1
+        ${isDragOverlay ? 'drag-overlay shadow-2xl scale-105' : ''}
+        animate-fade-in
+        card-shine
       `}
     >
-      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-        {task.title}
-      </h3>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <h3 className="font-semibold text-gray-100 leading-tight">
+          {task.title}
+        </h3>
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-4 h-4 text-gray-400"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"
+            />
+          </svg>
+        </span>
+      </div>
 
       {task.description && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+        <p className="text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">
           {task.description}
         </p>
       )}
 
       <div className="flex items-center gap-2 flex-wrap">
         <span
-          className={`text-xs px-2 py-1 rounded-full font-medium ${
-            priorityColors[task.priority as Priority]
+          className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+            priorityConfig[priority].bg
           }`}
         >
-          {priorityLabels[task.priority as Priority]}
+          <span className="text-[10px]">{priorityConfig[priority].icon}</span>
+          {priorityConfig[priority].label}
         </span>
 
         {task.dueDate && (
           <span
-            className={`text-xs px-2 py-1 rounded-full font-medium ${
+            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
               isOverdue
-                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-red-900/50 to-red-800/30 text-red-300 ring-1 ring-red-800 animate-pulse-soft'
+                : isDueSoon
+                ? 'bg-gradient-to-r from-orange-900/50 to-orange-800/30 text-orange-300 ring-1 ring-orange-800'
+                : 'bg-gradient-to-r from-slate-700/50 to-slate-600/30 text-gray-300 ring-1 ring-slate-600'
             }`}
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-3 h-3"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+              />
+            </svg>
             {formatDate(task.dueDate)}
+            {isOverdue && ' (Overdue)'}
           </span>
         )}
       </div>

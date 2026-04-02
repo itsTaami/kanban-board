@@ -6,9 +6,10 @@ A drag-and-drop kanban board built with Next.js 14, TypeScript, Prisma, and Tail
 
 - **Drag and Drop**: Reorder tasks within columns or move them between columns using @dnd-kit
 - **Task Management**: Create, edit, and delete tasks with title, description, priority, and due date
-- **Dark Mode**: Toggle between light and dark themes
+- **Dark Theme**: Beautiful dark-themed UI with gradient accents
 - **Persistent Storage**: SQLite database with Prisma ORM
 - **Responsive Design**: Works on desktop and mobile devices
+- **Progress Tracking**: Visual stats showing total tasks, completed tasks, and progress percentage
 
 ## Tech Stack
 
@@ -17,7 +18,6 @@ A drag-and-drop kanban board built with Next.js 14, TypeScript, Prisma, and Tail
 - **Database**: Prisma + SQLite
 - **Styling**: Tailwind CSS
 - **Drag & Drop**: @dnd-kit/core + @dnd-kit/sortable
-- **Theming**: next-themes
 
 ## Getting Started
 
@@ -57,6 +57,31 @@ A drag-and-drop kanban board built with Next.js 14, TypeScript, Prisma, and Tail
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Usage
+
+### Creating a Task
+1. Click the **+** button in any column header (To Do, In Progress, or Done)
+2. Fill in the task details:
+   - **Title** (required): Enter a descriptive task name
+   - **Description** (optional): Add more details about the task
+   - **Priority**: Select Low, Medium, or High
+   - **Due Date** (optional): Set a deadline
+3. Click **Create Task** to save
+
+### Editing a Task
+1. Click on any task card to open the edit modal
+2. Modify the task details as needed
+3. Click **Save Changes** to update
+
+### Deleting a Task
+1. Click on a task card to open the edit modal
+2. Click **Delete Task** at the bottom left
+3. Confirm deletion by clicking **Yes**
+
+### Moving Tasks (Drag and Drop)
+- **Between columns**: Drag a task card and drop it into another column to change its status
+- **Reorder within column**: Drag a task up or down within the same column to change its priority order
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -77,17 +102,14 @@ kanban-board/
 │   └── seed.ts            # Seed script
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx     # Root layout with providers
+│   │   ├── layout.tsx     # Root layout
 │   │   ├── page.tsx       # Main board page
-│   │   └── globals.css    # Tailwind + dark mode styles
+│   │   └── globals.css    # Tailwind styles
 │   ├── components/
 │   │   ├── Board.tsx      # Main kanban board with DnD
 │   │   ├── Column.tsx     # Single column component
 │   │   ├── TaskCard.tsx   # Draggable task card
-│   │   ├── TaskModal.tsx  # Create/Edit task modal
-│   │   ├── ThemeToggle.tsx
-│   │   └── providers/
-│   │       └── ThemeProvider.tsx
+│   │   └── TaskModal.tsx  # Create/Edit task modal
 │   ├── lib/
 │   │   ├── db.ts          # Prisma client singleton
 │   │   └── actions.ts     # Server actions (CRUD)

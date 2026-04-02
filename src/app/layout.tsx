@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
-  title: 'Kanban Board',
-  description: 'A drag-and-drop kanban board built with Next.js',
+  title: 'Kanban Board | Task Management',
+  description: 'A beautiful drag-and-drop kanban board for organizing your tasks and projects. Built with Next.js 14, TypeScript, and Tailwind CSS.',
+  keywords: ['kanban', 'task management', 'productivity', 'project management'],
 };
 
 export default function RootLayout({
@@ -16,16 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+    <html lang="en" className={`${inter.variable} dark`}>
+      <body className={`${inter.className} antialiased`}>
+        {children}
       </body>
     </html>
   );

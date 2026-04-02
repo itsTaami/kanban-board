@@ -32,48 +32,97 @@ async function main() {
   // Create sample tasks
   await prisma.task.createMany({
     data: [
+      // To Do tasks
       {
-        title: 'Set up project structure',
-        description: 'Initialize Next.js with TypeScript and Tailwind CSS',
+        title: 'Research API integration options',
+        description: 'Evaluate REST vs GraphQL for the backend API. Consider performance, caching, and developer experience.',
+        priority: 'HIGH',
+        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+        order: 0,
+        columnId: todoColumn.id,
+      },
+      {
+        title: 'Design user authentication flow',
+        description: 'Create wireframes for login, registration, and password reset screens.',
+        priority: 'HIGH',
+        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+        order: 1,
+        columnId: todoColumn.id,
+      },
+      {
+        title: 'Write unit tests for components',
+        description: 'Add Jest and React Testing Library tests for all UI components.',
+        priority: 'MEDIUM',
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        order: 2,
+        columnId: todoColumn.id,
+      },
+      {
+        title: 'Optimize images and assets',
+        description: 'Compress images, implement lazy loading, and set up CDN.',
+        priority: 'LOW',
+        order: 3,
+        columnId: todoColumn.id,
+      },
+      // In Progress tasks
+      {
+        title: 'Build responsive navigation',
+        description: 'Create mobile-first navigation with hamburger menu and smooth transitions.',
+        priority: 'HIGH',
+        dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Tomorrow
+        order: 0,
+        columnId: inProgressColumn.id,
+      },
+      {
+        title: 'Implement dark mode toggle',
+        description: 'Add theme switching functionality with system preference detection.',
+        priority: 'MEDIUM',
+        order: 1,
+        columnId: inProgressColumn.id,
+      },
+      {
+        title: 'Set up CI/CD pipeline',
+        description: 'Configure GitHub Actions for automated testing and deployment.',
+        priority: 'MEDIUM',
+        dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
+        order: 2,
+        columnId: inProgressColumn.id,
+      },
+      // Done tasks
+      {
+        title: 'Initialize project repository',
+        description: 'Set up Next.js 14 with TypeScript, Tailwind CSS, and ESLint configuration.',
         priority: 'HIGH',
         order: 0,
         columnId: doneColumn.id,
       },
       {
         title: 'Design database schema',
-        description: 'Create Prisma models for columns and tasks',
+        description: 'Created Prisma models for columns, tasks, and relationships.',
         priority: 'HIGH',
         order: 1,
         columnId: doneColumn.id,
       },
       {
         title: 'Implement drag and drop',
-        description: 'Add @dnd-kit for task reordering between columns',
+        description: 'Integrated @dnd-kit for smooth task reordering between columns.',
         priority: 'MEDIUM',
-        order: 0,
-        columnId: inProgressColumn.id,
+        order: 2,
+        columnId: doneColumn.id,
       },
       {
-        title: 'Add task modal',
-        description: 'Create modal for creating and editing tasks',
+        title: 'Create task management UI',
+        description: 'Built modal for creating and editing tasks with form validation.',
         priority: 'MEDIUM',
-        order: 1,
-        columnId: inProgressColumn.id,
+        order: 3,
+        columnId: doneColumn.id,
       },
       {
-        title: 'Write documentation',
-        description: 'Add README with setup instructions',
+        title: 'Add priority indicators',
+        description: 'Implemented color-coded priority badges for visual task organization.',
         priority: 'LOW',
-        order: 0,
-        columnId: todoColumn.id,
-      },
-      {
-        title: 'Add due date reminders',
-        description: 'Highlight tasks that are due soon or overdue',
-        priority: 'LOW',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        order: 1,
-        columnId: todoColumn.id,
+        order: 4,
+        columnId: doneColumn.id,
       },
     ],
   });
