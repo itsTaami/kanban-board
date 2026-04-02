@@ -81,10 +81,10 @@ export function HowToUse() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-gray-100">Complete Tasks</h3>
+                <h3 className="font-semibold text-gray-100">Complete / Revert</h3>
               </div>
               <p className="text-sm text-gray-400">
-                Click a task in In Progress, then press <span className="text-emerald-400 font-medium">Complete</span> to move it to Done.
+                Press <span className="text-emerald-400 font-medium">Complete</span> to finish a task, or <span className="text-blue-400 font-medium">Revert</span> to move it back to To Do.
               </p>
             </div>
 
